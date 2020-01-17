@@ -25,7 +25,7 @@ const Gateway = {
       switch(method){
         case "POST": {
           const response = await axios.post(urlRequest, data, { headers: dataHeaders })
-          return proxyResponse(200, response.data)
+          return proxyResponse(response.status, response.data)
         }
         case "GET":
         default:  {

@@ -4,6 +4,7 @@ import styles from './Schedule.module.css'
 import Gateway from '../../lib/gateway'
 import moment from 'moment'
 import { isEmpty, isUndefined } from 'lodash'
+import Message from '../Message/Message'
 
 class Schedule extends Component {
     constructor(props) {
@@ -22,7 +23,6 @@ class Schedule extends Component {
     }
 
     componentDidMount() {
-
         this.getRooms()
     }
 
@@ -72,6 +72,21 @@ class Schedule extends Component {
         })
     }
 
+    treatmentMsgResponse(data) {
+
+        if (data.success) {
+            Message.build('success', 'Reunião marcada com sucesso')
+            return;
+        }
+
+        var msgError = isUndefined(data.errors)
+            ? "<li>Não foi possível realizar o agendamento da reunião, por favor revise os dados de envio</li>"
+            : data.errors.map((value) => `<li>${value}</li>`)
+
+        Message.build('warning', msgError.toString().replace(",", ""));
+
+    }
+
     async save(event) {
         event.preventDefault()
 
@@ -92,7 +107,8 @@ class Schedule extends Component {
         });
 
         const response = await Gateway.request(undefined, data, "POST")
-        
+
+        this.treatmentMsgResponse(response.data)
         document.getElementById("btn-salvar").innerHTML = currentText
     }
 
@@ -101,12 +117,8 @@ class Schedule extends Component {
         return `${h}:${m}`
     }
 
-    addMsgError(msg) {
+    addMsgWarning(msg) {
         return `<li class="item-error">${msg}</li>`
-    }
-
-    showError(msg) {
-        console.log(msg)
     }
 
     validate() {
@@ -114,22 +126,22 @@ class Schedule extends Component {
         var msgErrors = ""
 
         if (isEmpty(title))
-            msgErrors += this.addMsgError("Informe o título da reunião")
+            msgErrors += this.addMsgWarning("Informe o título da reunião")
 
         if (roomId <= 0)
-            msgErrors += this.addMsgError("Informe a sala da reunião")
+            msgErrors += this.addMsgWarning("Informe a sala da reunião")
 
         if (isUndefined(date))
-            msgErrors += this.addMsgError("informe a data da reunião")
+            msgErrors += this.addMsgWarning("Informe a data da reunião")
 
         if (isUndefined(start))
-            msgErrors += this.addMsgError("informe a hora de início da reunião")
+            msgErrors += this.addMsgWarning("Informe a hora de início da reunião")
 
         if (isUndefined(end))
-            msgErrors += this.addMsgError("informe a hora de término da reunião")
+            msgErrors += this.addMsgWarning("Informe a hora de término da reunião")
 
         if (msgErrors.length > 0)
-            this.showError(msgErrors)
+            Message.build('warning', msgErrors)
 
         return msgErrors.length === 0
     }
