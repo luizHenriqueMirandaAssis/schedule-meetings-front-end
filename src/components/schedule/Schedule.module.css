@@ -1,0 +1,11 @@
+.container_schedule {
+   width: 30%;
+   border: 1px solid #fff;
+   border-radius: 6px;
+   padding: 5px 15px;
+   background-color: #fff;
+}
+
+.container_footer{
+    float: right;;
+}
